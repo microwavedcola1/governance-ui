@@ -20,13 +20,14 @@ function errorWrapper() {
 async function runNotifier() {
   const nowInSeconds = new Date().getTime() / 1000
 
-  const MAINNET_RPC_NODE = 'https://api.mainnet-beta.solana.com'
+  const RPC_NODE =
+    process.env.RPC_NODE_URL || 'https://api.mainnet-beta.solana.com'
 
   const realmInfo = getRealmInfo('MNGO')
 
   const governances = await getGovernanceAccounts<Governance>(
     realmInfo!.programId,
-    MAINNET_RPC_NODE,
+    RPC_NODE,
     Governance,
     getAccountTypes(Governance),
     [pubkeyFilter(1, realmInfo!.realmId)]
@@ -38,7 +39,7 @@ async function runNotifier() {
     governanceIds.map((governanceId) => {
       return getGovernanceAccounts<Proposal>(
         realmInfo!.programId,
-        MAINNET_RPC_NODE,
+        RPC_NODE,
         Proposal,
         getAccountTypes(Proposal),
         [pubkeyFilter(1, governanceId)]
