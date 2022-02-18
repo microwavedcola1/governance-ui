@@ -23,14 +23,14 @@ function warnWhenClosingInXHours(
   proposalPubKey: string,
   useWebHook = false
 ) {
-  const fourHoursBefore = closingInHours * 60 * 60
+  const xHoursBefore = closingInHours * 60 * 60
   const closingInSeconds =
     proposal.info.votingAt!.toNumber() +
     realmGovernances[proposal.info.governance.toBase58()].info.config
       .maxVotingTime
   if (
-    closingInSeconds - nowInSeconds > fourHoursBefore - fiveMinutesSeconds &&
-    closingInSeconds - nowInSeconds < fourHoursBefore + toleranceSeconds
+    closingInSeconds - nowInSeconds > xHoursBefore - fiveMinutesSeconds &&
+    closingInSeconds - nowInSeconds < xHoursBefore + toleranceSeconds
   ) {
     const msg = `“${proposal.info.name}” proposal closing in four hours 🗳 https://dao-beta.mango.markets/dao/MNGO/proposal/${proposalPubKey}`
     console.log(msg)
