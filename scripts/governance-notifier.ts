@@ -102,6 +102,23 @@ async function runNotifier() {
         axios.post(process.env.WEBHOOK_URL, { content: msg })
       }
     }
+
+    const fourHoursBefore = 4 * 60 * 60
+    const closingInSeconds =
+      proposal.info.votingAt!.toNumber() +
+      realmGovernances[proposal.info.governance.toBase58()].info.config
+        .maxVotingTime
+    if (
+      closingInSeconds - nowInSeconds > fourHoursBefore + fiveMinutesSeconds &&
+      closingInSeconds - nowInSeconds <
+        fourHoursBefore + fiveMinutesSeconds + toleranceSeconds
+    ) {
+      const msg = `“${proposal.info.name}” proposal closing in four hours 🗳 https://dao-beta.mango.markets/dao/MNGO/proposal/${k}`
+      console.log(msg)
+      if (process.env.WEBHOOK_URL) {
+        axios.post(process.env.WEBHOOK_URL, { content: msg })
+      }
+    }
   }
   console.log(
     `-- countJustOpenedForVoting: ${countJustOpenedForVoting}, countVotingNotStartedYet: ${countVotingNotStartedYet}, countClosed: ${countClosed}`
