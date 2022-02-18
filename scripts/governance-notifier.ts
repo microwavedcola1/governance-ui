@@ -146,4 +146,5 @@ async function runNotifier() {
   )
 }
 
+errorWrapper()
 setInterval(errorWrapper, fiveMinutesSeconds * 1000)
