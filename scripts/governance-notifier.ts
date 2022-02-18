@@ -32,7 +32,7 @@ function warnWhenClosingInXHours(
     closingInSeconds - nowInSeconds > xHoursBefore - fiveMinutesSeconds &&
     closingInSeconds - nowInSeconds < xHoursBefore + toleranceSeconds
   ) {
-    const msg = `“${proposal.info.name}” proposal closing in four hours 🗳 https://dao-beta.mango.markets/dao/MNGO/proposal/${proposalPubKey}`
+    const msg = `“${proposal.info.name}” proposal closing in ${closingInHours} hours 🗳 https://dao-beta.mango.markets/dao/MNGO/proposal/${proposalPubKey}`
     console.log(msg)
     if (useWebHook && process.env.WEBHOOK_URL) {
       axios.post(process.env.WEBHOOK_URL, { content: msg })
