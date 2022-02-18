@@ -136,10 +136,6 @@ async function runNotifier() {
       k,
       true
     )
-
-    warnWhenClosingInXHours(proposal, realmGovernances, 3, nowInSeconds, k)
-    warnWhenClosingInXHours(proposal, realmGovernances, 2, nowInSeconds, k)
-    warnWhenClosingInXHours(proposal, realmGovernances, 1, nowInSeconds, k)
   }
   console.log(
     `-- countJustOpenedForVoting: ${countJustOpenedForVoting}, countVotingNotStartedYet: ${countVotingNotStartedYet}, countClosed: ${countClosed}`
