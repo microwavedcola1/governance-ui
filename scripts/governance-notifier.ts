@@ -15,6 +15,32 @@ function errorWrapper() {
   })
 }
 
+function warnWhenClosingInXHours(
+  proposal: ParsedAccount<Proposal>,
+  realmGovernances: { [p: string]: ParsedAccount<Governance> },
+  closingInHours = 4,
+  nowInSeconds: number,
+  proposalPubKey: string,
+  useWebHook = false
+) {
+  const fourHoursBefore = closingInHours * 60 * 60
+  const closingInSeconds =
+    proposal.info.votingAt!.toNumber() +
+    realmGovernances[proposal.info.governance.toBase58()].info.config
+      .maxVotingTime
+  if (
+    closingInSeconds - nowInSeconds > fourHoursBefore + fiveMinutesSeconds &&
+    closingInSeconds - nowInSeconds <
+      fourHoursBefore + fiveMinutesSeconds + toleranceSeconds
+  ) {
+    const msg = `“${proposal.info.name}” proposal closing in four hours 🗳 https://dao-beta.mango.markets/dao/MNGO/proposal/${proposalPubKey}`
+    console.log(msg)
+    if (useWebHook && process.env.WEBHOOK_URL) {
+      axios.post(process.env.WEBHOOK_URL, { content: msg })
+    }
+  }
+}
+
 // run every 5 mins, checks if a mngo governance proposal just opened in the last 5 mins
 // and notifies on WEBHOOK_URL
 async function runNotifier() {
@@ -103,22 +129,18 @@ async function runNotifier() {
       }
     }
 
-    const fourHoursBefore = 4 * 60 * 60
-    const closingInSeconds =
-      proposal.info.votingAt!.toNumber() +
-      realmGovernances[proposal.info.governance.toBase58()].info.config
-        .maxVotingTime
-    if (
-      closingInSeconds - nowInSeconds > fourHoursBefore + fiveMinutesSeconds &&
-      closingInSeconds - nowInSeconds <
-        fourHoursBefore + fiveMinutesSeconds + toleranceSeconds
-    ) {
-      const msg = `“${proposal.info.name}” proposal closing in four hours 🗳 https://dao-beta.mango.markets/dao/MNGO/proposal/${k}`
-      console.log(msg)
-      if (process.env.WEBHOOK_URL) {
-        axios.post(process.env.WEBHOOK_URL, { content: msg })
-      }
-    }
+    warnWhenClosingInXHours(
+      proposal,
+      realmGovernances,
+      4,
+      nowInSeconds,
+      k,
+      true
+    )
+
+    warnWhenClosingInXHours(proposal, realmGovernances, 3, nowInSeconds, k)
+    warnWhenClosingInXHours(proposal, realmGovernances, 2, nowInSeconds, k)
+    warnWhenClosingInXHours(proposal, realmGovernances, 1, nowInSeconds, k)
   }
   console.log(
     `-- countJustOpenedForVoting: ${countJustOpenedForVoting}, countVotingNotStartedYet: ${countVotingNotStartedYet}, countClosed: ${countClosed}`
