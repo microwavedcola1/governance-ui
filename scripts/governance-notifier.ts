@@ -30,8 +30,7 @@ function warnWhenClosingInXHours(
       .maxVotingTime
   if (
     closingInSeconds - nowInSeconds > fourHoursBefore + fiveMinutesSeconds &&
-    closingInSeconds - nowInSeconds <
-      fourHoursBefore + fiveMinutesSeconds + toleranceSeconds
+    closingInSeconds - nowInSeconds < fourHoursBefore + toleranceSeconds
   ) {
     const msg = `“${proposal.info.name}” proposal closing in four hours 🗳 https://dao-beta.mango.markets/dao/MNGO/proposal/${proposalPubKey}`
     console.log(msg)
