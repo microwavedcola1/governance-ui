@@ -131,7 +131,7 @@ async function runNotifier() {
     warnWhenClosingInXHours(
       proposal,
       realmGovernances,
-      4,
+      6,
       nowInSeconds,
       k,
       true
