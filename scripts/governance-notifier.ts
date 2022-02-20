@@ -15,30 +15,30 @@ function errorWrapper() {
   })
 }
 
-function warnWhenClosingInXHours(
-  proposal: ParsedAccount<Proposal>,
-  realmGovernances: { [p: string]: ParsedAccount<Governance> },
-  closingInHours = 4,
-  nowInSeconds: number,
-  proposalPubKey: string,
-  useWebHook = false
-) {
-  const xHoursBefore = closingInHours * 60 * 60
-  const closingInSeconds =
-    proposal.info.votingAt!.toNumber() +
-    realmGovernances[proposal.info.governance.toBase58()].info.config
-      .maxVotingTime
-  if (
-    closingInSeconds - nowInSeconds > xHoursBefore - fiveMinutesSeconds &&
-    closingInSeconds - nowInSeconds < xHoursBefore + toleranceSeconds
-  ) {
-    const msg = `“${proposal.info.name}” proposal closing in ${closingInHours} hours 🗳 https://dao-beta.mango.markets/dao/MNGO/proposal/${proposalPubKey}`
-    console.log(msg)
-    if (useWebHook && process.env.WEBHOOK_URL) {
-      axios.post(process.env.WEBHOOK_URL, { content: msg })
-    }
-  }
-}
+// function warnWhenClosingInXHours(
+//   proposal: ParsedAccount<Proposal>,
+//   realmGovernances: { [p: string]: ParsedAccount<Governance> },
+//   closingInHours = 4,
+//   nowInSeconds: number,
+//   proposalPubKey: string,
+//   useWebHook = false
+// ) {
+//   const xHoursBefore = closingInHours * 60 * 60
+//   const closingInSeconds =
+//     proposal.info.votingAt!.toNumber() +
+//     realmGovernances[proposal.info.governance.toBase58()].info.config
+//       .maxVotingTime
+//   if (
+//     closingInSeconds - nowInSeconds > xHoursBefore - fiveMinutesSeconds &&
+//     closingInSeconds - nowInSeconds < xHoursBefore + toleranceSeconds
+//   ) {
+//     const msg = `“${proposal.info.name}” proposal closing in ${closingInHours} hours 🗳 https://dao-beta.mango.markets/dao/MNGO/proposal/${proposalPubKey}`
+//     console.log(msg)
+//     if (useWebHook && process.env.WEBHOOK_URL) {
+//       axios.post(process.env.WEBHOOK_URL, { content: msg })
+//     }
+//   }
+// }
 
 // run every 5 mins, checks if a mngo governance proposal just opened in the last 5 mins
 // and notifies on WEBHOOK_URL
@@ -128,14 +128,15 @@ async function runNotifier() {
       }
     }
 
-    warnWhenClosingInXHours(
-      proposal,
-      realmGovernances,
-      6,
-      nowInSeconds,
-      k,
-      true
-    )
+    // todo: warn only when quorum is not reached
+    // warnWhenClosingInXHours(
+    //   proposal,
+    //   realmGovernances,
+    //   6,
+    //   nowInSeconds,
+    //   k,
+    //   true
+    // )
   }
   console.log(
     `-- countJustOpenedForVoting: ${countJustOpenedForVoting}, countVotingNotStartedYet: ${countVotingNotStartedYet}, countClosed: ${countClosed}`
