@@ -1,1 +1,1 @@
-worker: npm run notifier
+worker: yarn notifier
