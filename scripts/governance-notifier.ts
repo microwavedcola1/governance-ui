@@ -62,9 +62,18 @@ async function runNotifier() {
   let countOpenForVotingSinceSomeTime = 0
   let countVotingNotStartedYet = 0
   let countClosed = 0
+  let countCancelled = 0
   const nowInSeconds = new Date().getTime() / 1000
   for (const k in proposals) {
     const proposal = proposals[k]
+
+    if (
+      // proposal is cancelled
+      proposal.account.state === ProposalState.Cancelled
+    ) {
+      countCancelled++
+      continue
+    }
 
     if (
       // voting is closed
@@ -108,9 +117,30 @@ async function runNotifier() {
     else if (proposal.account.state === ProposalState.Voting) {
       countOpenForVotingSinceSomeTime++
     }
+
+    const remainingInSeconds =
+      governancesMap[proposal.account.governance.toBase58()].account.config
+        .maxVotingTime +
+      proposal.account.votingAt.toNumber() -
+      nowInSeconds
+    if (
+      remainingInSeconds > 36000 &&
+      remainingInSeconds < 36000 + toleranceSeconds
+    ) {
+      const msg = `“${
+        proposal.account.name
+      }” proposal will close for voting 🗳 https://dao-beta.mango.markets/dao/${escape(
+        REALM_SYMBOL
+      )}/proposal/${proposal.pubkey.toBase58()} in 10 hrs`
+
+      console.log(msg)
+      if (process.env.WEBHOOK_URL) {
+        axios.post(process.env.WEBHOOK_URL, { content: msg })
+      }
+    }
   }
   console.log(
-    `-- countOpenForVotingSinceSomeTime: ${countOpenForVotingSinceSomeTime}, countJustOpenedForVoting: ${countJustOpenedForVoting}, countVotingNotStartedYet: ${countVotingNotStartedYet}, countClosed: ${countClosed}`
+    `-- countOpenForVotingSinceSomeTime: ${countOpenForVotingSinceSomeTime}, countJustOpenedForVoting: ${countJustOpenedForVoting}, countVotingNotStartedYet: ${countVotingNotStartedYet}, countClosed: ${countClosed}, countCancelled: ${countCancelled}`
   )
 }
 
