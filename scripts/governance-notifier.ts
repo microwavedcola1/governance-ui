@@ -125,7 +125,7 @@ async function runNotifier() {
       nowInSeconds
     if (
       remainingInSeconds > 36000 &&
-      remainingInSeconds < 36000 + toleranceSeconds
+      remainingInSeconds < 36000 + fiveMinutesSeconds + toleranceSeconds
     ) {
       const msg = `“${
         proposal.account.name
