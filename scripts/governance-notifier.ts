@@ -4,7 +4,6 @@ import { getConnectionContext } from 'utils/connection'
 import {
   getGovernanceAccounts,
   Governance,
-  ProgramAccount,
   Proposal,
   ProposalState,
   pubkeyFilter,
@@ -53,10 +52,6 @@ async function runNotifier() {
     })
   )
 
-  const proposals: {
-    [proposal: string]: ProgramAccount<Proposal>
-  } = Object.assign({}, ...proposalsByGovernance)
-
   console.log(`- scanning all '${REALM_SYMBOL}' proposals`)
   let countJustOpenedForVoting = 0
   let countOpenForVotingSinceSomeTime = 0
@@ -64,81 +59,85 @@ async function runNotifier() {
   let countClosed = 0
   let countCancelled = 0
   const nowInSeconds = new Date().getTime() / 1000
-  for (const k in proposals) {
-    const proposal = proposals[k]
+  for (const proposals_ of proposalsByGovernance) {
+    for (const proposal of proposals_) {
+      //// debugging
+      // console.log(
+      //   `-- proposal ${proposal.account.governance.toBase58()} - ${
+      //     proposal.account.name
+      //   }`
+      // )
 
-    // for debugging
-    // console.log(`-- proposal - ${proposal.account.name}`)
-
-    if (
-      // proposal is cancelled
-      proposal.account.state === ProposalState.Cancelled
-    ) {
-      countCancelled++
-      continue
-    }
-
-    if (
-      // voting is closed
-      proposal.account.votingCompletedAt
-    ) {
-      countClosed++
-      continue
-    }
-
-    if (
-      // voting has not started yet
-      !proposal.account.votingAt
-    ) {
-      countVotingNotStartedYet++
-      continue
-    }
-
-    if (
-      // proposal opened in last 5 mins
-      nowInSeconds - proposal.account.votingAt.toNumber() <=
-      fiveMinutesSeconds + toleranceSeconds
-      // proposal opened in last 24 hrs - useful to notify when bot recently stopped working
-      // and missed the 5 min window
-      // (nowInSeconds - proposal.info.votingAt.toNumber())/(60 * 60) <=
-      // 24
-    ) {
-      countJustOpenedForVoting++
-
-      const msg = `“${
-        proposal.account.name
-      }” proposal just opened for voting 🗳 https://dao-beta.mango.markets/dao/${escape(
-        REALM_SYMBOL
-      )}/proposal/${proposal.pubkey.toBase58()}`
-
-      console.log(msg)
-      if (process.env.WEBHOOK_URL) {
-        axios.post(process.env.WEBHOOK_URL, { content: msg })
+      if (
+        // proposal is cancelled
+        proposal.account.state === ProposalState.Cancelled
+      ) {
+        countCancelled++
+        continue
       }
-    }
-    // note that these could also include those in finalizing state, but this is just for logging
-    else if (proposal.account.state === ProposalState.Voting) {
-      countOpenForVotingSinceSomeTime++
-    }
 
-    const remainingInSeconds =
-      governancesMap[proposal.account.governance.toBase58()].account.config
-        .maxVotingTime +
-      proposal.account.votingAt.toNumber() -
-      nowInSeconds
-    if (
-      remainingInSeconds > 36000 &&
-      remainingInSeconds < 36000 + fiveMinutesSeconds + toleranceSeconds
-    ) {
-      const msg = `“${
-        proposal.account.name
-      }” proposal will close for voting 🗳 https://dao-beta.mango.markets/dao/${escape(
-        REALM_SYMBOL
-      )}/proposal/${proposal.pubkey.toBase58()} in 10 hrs`
+      if (
+        // voting is closed
+        proposal.account.votingCompletedAt
+      ) {
+        countClosed++
+        continue
+      }
 
-      console.log(msg)
-      if (process.env.WEBHOOK_URL) {
-        axios.post(process.env.WEBHOOK_URL, { content: msg })
+      if (
+        // voting has not started yet
+        !proposal.account.votingAt
+      ) {
+        countVotingNotStartedYet++
+        continue
+      }
+
+      if (
+        // proposal opened in last 5 mins
+        nowInSeconds - proposal.account.votingAt.toNumber() <=
+        fiveMinutesSeconds + toleranceSeconds
+        // proposal opened in last 24 hrs - useful to notify when bot recently stopped working
+        // and missed the 5 min window
+        // (nowInSeconds - proposal.info.votingAt.toNumber())/(60 * 60) <=
+        // 24
+      ) {
+        countJustOpenedForVoting++
+
+        const msg = `“${
+          proposal.account.name
+        }” proposal just opened for voting 🗳 https://dao-beta.mango.markets/dao/${escape(
+          REALM_SYMBOL
+        )}/proposal/${proposal.pubkey.toBase58()}`
+
+        console.log(msg)
+        if (process.env.WEBHOOK_URL) {
+          axios.post(process.env.WEBHOOK_URL, { content: msg })
+        }
+      }
+      // note that these could also include those in finalizing state, but this is just for logging
+      else if (proposal.account.state === ProposalState.Voting) {
+        countOpenForVotingSinceSomeTime++
+      }
+
+      const remainingInSeconds =
+        governancesMap[proposal.account.governance.toBase58()].account.config
+          .maxVotingTime +
+        proposal.account.votingAt.toNumber() -
+        nowInSeconds
+      if (
+        remainingInSeconds > 36000 &&
+        remainingInSeconds < 36000 + fiveMinutesSeconds + toleranceSeconds
+      ) {
+        const msg = `“${
+          proposal.account.name
+        }” proposal will close for voting 🗳 https://dao-beta.mango.markets/dao/${escape(
+          REALM_SYMBOL
+        )}/proposal/${proposal.pubkey.toBase58()} in 10 hrs`
+
+        console.log(msg)
+        if (process.env.WEBHOOK_URL) {
+          axios.post(process.env.WEBHOOK_URL, { content: msg })
+        }
       }
     }
   }
