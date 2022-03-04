@@ -117,6 +117,18 @@ async function runNotifier() {
       // note that these could also include those in finalizing state, but this is just for logging
       else if (proposal.account.state === ProposalState.Voting) {
         countOpenForVotingSinceSomeTime++
+
+        //// in case bot has an issue, uncomment, and run from local with webhook url set as env var
+        // const msg = `“${
+        //     proposal.account.name
+        // }” proposal just opened for voting 🗳 https://dao-beta.mango.markets/dao/${escape(
+        //     REALM_SYMBOL
+        // )}/proposal/${proposal.pubkey.toBase58()}`
+        //
+        // console.log(msg)
+        // if (process.env.WEBHOOK_URL) {
+        //   axios.post(process.env.WEBHOOK_URL, { content: msg })
+        // }
       }
 
       const remainingInSeconds =
