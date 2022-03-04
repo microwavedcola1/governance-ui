@@ -67,6 +67,9 @@ async function runNotifier() {
   for (const k in proposals) {
     const proposal = proposals[k]
 
+    // for debugging
+    // console.log(`-- proposal - ${proposal.account.name}`)
+
     if (
       // proposal is cancelled
       proposal.account.state === ProposalState.Cancelled
