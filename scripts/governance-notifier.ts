@@ -137,14 +137,14 @@ async function runNotifier() {
         proposal.account.votingAt.toNumber() -
         nowInSeconds
       if (
-        remainingInSeconds > 36000 &&
-        remainingInSeconds < 36000 + fiveMinutesSeconds + toleranceSeconds
+        remainingInSeconds > 86400 &&
+        remainingInSeconds < 86400 + fiveMinutesSeconds + toleranceSeconds
       ) {
         const msg = `“${
           proposal.account.name
         }” proposal will close for voting 🗳 https://dao-beta.mango.markets/dao/${escape(
           REALM_SYMBOL
-        )}/proposal/${proposal.pubkey.toBase58()} in 10 hrs`
+        )}/proposal/${proposal.pubkey.toBase58()} in 24 hrs`
 
         console.log(msg)
         if (process.env.WEBHOOK_URL) {
